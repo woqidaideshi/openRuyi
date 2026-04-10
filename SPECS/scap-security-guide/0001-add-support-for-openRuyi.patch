@@ -2281,10 +2281,22 @@ index 0000000000..26e2498a3e
 +  </unix:uname_state>
 +</def-group>
 diff --git a/shared/macros/01-general.jinja b/shared/macros/01-general.jinja
-index 80dc6eeca5..d8336855c3 100644
+index 80dc6eeca5..7b59cf47a6 100644
 --- a/shared/macros/01-general.jinja
 +++ b/shared/macros/01-general.jinja
-@@ -1262,6 +1262,8 @@ Part of the grub2_bootloader_argument(_absent) templates.
+@@ -1209,7 +1209,11 @@ For more details on configuring kernel arguments in bootable container images, p
+ {{% macro describe_kernel_build_config(config, value) -%}}
+     The configuration that was used to build kernel is available at <tt>/boot/config-*</tt>.
+     To check the configuration value for <tt>{{{ config }}}</tt>, run the following command:
++    {{% if product == "openruyi" %}}
++    <tt>zcat /proc/config.gz | grep {{{ config }}}</tt>
++    {{% else %}}
+     <tt>grep {{{ config }}} /boot/config-*</tt>
++    {{% endif %}}
+     {{% if value == "n" %}}
+     Configs with value 'n' are not explicitly set in the file, so either commented lines or no
+     lines should be returned.
+@@ -1262,6 +1266,8 @@ Part of the grub2_bootloader_argument(_absent) templates.
  {{% macro grub_command(action, arg_name_value=None) -%}}
  {{%- if "update-grub" in grub_helper_executable -%}}
      {{%- set grub_helper_args = [] -%}}
@@ -2317,6 +2329,22 @@ index 33417159b0..12a5053c9c 100644
  {{% elif 'debian' in product %}}
  - name: Update grub defaults and the bootloader menu
    ansible.builtin.command: /usr/sbin/update-grub
+diff --git a/shared/macros/10-ocil.jinja b/shared/macros/10-ocil.jinja
+index ab94d09569..36b8cd575c 100644
+--- a/shared/macros/10-ocil.jinja
++++ b/shared/macros/10-ocil.jinja
+@@ -1318,7 +1318,11 @@ Fill in <tt>GRUBENV_FILE_LOCATION</tt> based on information above.
+ #}}
+ {{% macro ocil_kernel_build_config(config, value) -%}}
+     To determine the config value the kernel was built with, run the following command:
++    {{% if product == "openruyi" %}}
++    <pre>$ zcat /proc/config.gz | grep {{{ config }}}</pre>
++    {{% else %}}
+     <pre>$ grep {{{ config }}} /boot/config.*</pre>
++    {{% endif %}}
+     {{% if value == "n" %}}
+     Configs with value 'n' are not explicitly set in the file, so either commented lines or no
+     lines should be returned.
 diff --git a/ssg/constants.py b/ssg/constants.py
 index f104ecec2c..63bcdf287f 100644
 --- a/ssg/constants.py
