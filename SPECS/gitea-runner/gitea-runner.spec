@@ -20,28 +20,23 @@ Source2:        LICENSE
 Act runner is a runner for Gitea based on Gitea fork of act..
 
 %prep
-%setup -q -T
-mv act_runner-%{version}-linux- act_runner
+xz -dc act_runner-%{version}-linux-riscv64.xz > act_runner
 
 %conf
 
 %build
 
 %install
-mkdir %{buildroot}/var/lib/gitea-runner
-cp act_runner-%{version}-linux-riscv64 %{buildroot}/var/lib/gitea-runner/
-cp %{SOURCE1} %{buildroot}/var/lib/gitea-runner/
-chmod +x cp act_runner-%{version}-linux-riscv64 %{buildroot}/var/lib/gitea-runner/act_runner-%{version}-linux-riscv64
-cd %{buildroot}/var/lib/gitea-runner
-ln -sf act_runner-%{version}-linux-riscv64 act_runner
+mkdir -p %{buildroot}/var/lib/gitea-runner
+install -m755 act_runner %{buildroot}/var/lib/gitea-runner/
 
-mkdir -p %{buildroot}%{_datadir}/licenses/%{name}
-cp %{SOURCE2} %{buildroot}%{_datadir}/licenses/%{name}/
+mkdir -p %{buildroot}%{_unitdir}
+install -m644 %{SOURCE1} %{buildroot}%{_unitdir}/
 
 %check
 
 %files
-%license %{_datadir}/licenses/gitea-runner/LICENSE
+%license LICENSE
 %{_unitdir}/act_runner.service
 %{_sharedstatedir}/gitea-runner
 
