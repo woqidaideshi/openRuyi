@@ -20,11 +20,14 @@ Source2:        LICENSE
 Act runner is a runner for Gitea based on Gitea fork of act..
 
 %prep
-xz -dc act_runner-%{version}-linux-riscv64.xz > act_runner
+xz -dc %{SOURCE0} > act_runner
+cp %{SOURCE2} ./
 
 %conf
+# No conf.
 
 %build
+# No build.
 
 %install
 mkdir -p %{buildroot}/var/lib/gitea-runner
@@ -34,6 +37,7 @@ mkdir -p %{buildroot}%{_unitdir}
 install -m644 %{SOURCE1} %{buildroot}%{_unitdir}/
 
 %check
+# No tests.
 
 %files
 %license LICENSE
