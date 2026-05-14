@@ -6,7 +6,7 @@ After=network-online.target multi-user.target docker.service
 [Service]
 Type=simple
 WorkingDirectory=/var/lib/gitea-runner
-ExecStart=/var/lib/gitea-runner/act_runner daemon --config /var/lib/gitea-runner/config.yaml
+ExecStart=/var/lib/gitea-runner/gitea-runner daemon --config /var/lib/gitea-runner/config.yaml
 Restart=always
 RestartSec=10
 Environment=HOME=/var/lib/gitea-runner
