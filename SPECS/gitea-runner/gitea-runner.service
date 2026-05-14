@@ -1,0 +1,17 @@
+[Unit]
+Description=Gitea Action Runner Service
+Wants=network-online.target
+After=network-online.target multi-user.target docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/var/lib/gitea-runner
+ExecStart=/var/lib/gitea-runner/gitea-runner daemon --config /var/lib/gitea-runner/config.yaml
+Restart=always
+RestartSec=10
+Environment=HOME=/var/lib/gitea-runner
+StandardOutput=append:/var/log/gitea-runner-out.log
+StandardError=inherit
+
+[Install]
+WantedBy=multi-user.target
