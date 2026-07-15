@@ -22,17 +22,7 @@ Patch2002:      2002-fix-disable-ml_selector.patch
 BuildOption(conf):  -DCMAKE_EXE_LINKER_FLAGS="%{build_ldflags} -Wl,--as-needed"
 BuildOption(conf):  -DCMAKE_MODULE_LINKER_FLAGS="%{build_ldflags} -Wl,--as-needed"
 BuildOption(conf):  -DCMAKE_SHARED_LINKER_FLAGS="%{build_ldflags} -Wl,--as-needed"
-BuildOption(conf):  -DOPENZL_BUILD_TESTS:BOOL=OFF
-BuildOption(conf):  -DOPENZL_BUILD_BENCHMARKS:BOOL=OFF
-BuildOption(conf):  -DBUILD_SHARED_LIBS:BOOL=ON
-BuildOption(conf):  -DOPENZL_BUILD_CPP:BOOL=ON
-BuildOption(conf):  -DOPENZL_CPP_INSTALL:BOOL=ON
-BuildOption(conf):  -DOPENZL_BUILD_TOOLS:BOOL=OFF
 BuildOption(conf):  -DOPENZL_BUILD_CLI:BOOL=ON
-BuildOption(conf):  -DOPENZL_BUILD_EXAMPLES:BOOL=OFF
-BuildOption(conf):  -DOPENZL_ALLOW_INTROSPECTION:BOOL=OFF
-BuildOption(conf):  -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-BuildOption(conf):  -DZSTD_BUILD_STATIC:BOOL=OFF
 
 BuildRequires:  cmake
 BuildRequires:  gcc-c++
