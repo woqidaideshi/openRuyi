@@ -16,7 +16,7 @@ Source0:        https://github.com/facebook/openzl/archive/refs/tags/v%{version}
 BuildSystem:    cmake
 
 Patch2000:      2000-fix-install-missing-libs.patch
-Patch2001:      2001-feat-prefer-system-installed-zstd-over-bundled-depen.patch
+Patch2001:      2001-feat-prefer-system-installed-zstd-and-lz4-over-bundl.patch
 
 BuildOption(conf):  -DCMAKE_EXE_LINKER_FLAGS="%{build_ldflags} -Wl,--as-needed"
 BuildOption(conf):  -DCMAKE_MODULE_LINKER_FLAGS="%{build_ldflags} -Wl,--as-needed"
@@ -36,6 +36,7 @@ BuildRequires:  cmake
 BuildRequires:  gcc-c++
 BuildRequires:  make
 BuildRequires:  pkgconfig(libzstd)
+BuildRequires:  pkgconfig(liblz4)
 
 %description
 OpenZL delivers high compression ratios while preserving high speed. It takes a
