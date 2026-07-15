@@ -17,6 +17,7 @@ BuildSystem:    cmake
 
 Patch2000:      2000-fix-install-missing-libs.patch
 Patch2001:      2001-feat-prefer-system-installed-zstd-and-lz4-over-bundl.patch
+Patch2002:      2002-fix-disable-ml_selector.patch
 
 BuildOption(conf):  -DCMAKE_EXE_LINKER_FLAGS="%{build_ldflags} -Wl,--as-needed"
 BuildOption(conf):  -DCMAKE_MODULE_LINKER_FLAGS="%{build_ldflags} -Wl,--as-needed"

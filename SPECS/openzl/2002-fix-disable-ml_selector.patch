@@ -1,0 +1,32 @@
+From 3b17da126cb6e572655cb5fe7f01e0a9b85a48b5 Mon Sep 17 00:00:00 2001
+From: Yafen Fang <yafen@iscas.ac.cn>
+Date: Wed, 15 Jul 2026 17:51:49 +0800
+Subject: [PATCH] fix: disable ml_selector
+
+---
+ tools/CMakeLists.txt | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
+index 2dfa0d9..63753d6 100644
+--- a/tools/CMakeLists.txt
++++ b/tools/CMakeLists.txt
+@@ -19,7 +19,6 @@ if(OPENZL_BUILD_TOOLS)
+   set(OPENZL_BUILD_IO_TOOLS ON)
+   set(OPENZL_BUILD_SDDL_TOOLS ON)
+   set(OPENZL_BUILD_TRAINING_TOOLS ON)
+-  set(OPENZL_BUILD_ML_SELECTOR ON)
+ endif()
+ if(OPENZL_BUILD_CLI)
+   set(OPENZL_BUILD_ARG_TOOLS ON)
+@@ -27,7 +26,6 @@ if(OPENZL_BUILD_CLI)
+   set(OPENZL_BUILD_LOGGER ON)
+   set(OPENZL_BUILD_SDDL_TOOLS ON)
+   set(OPENZL_BUILD_TRAINING_TOOLS ON)
+-  set(OPENZL_BUILD_ML_SELECTOR ON)
+ endif()
+ if(OPENZL_BUILD_PYTHON_EXT)
+   set(OPENZL_BUILD_LOGGER ON)
+-- 
+2.34.1
+
