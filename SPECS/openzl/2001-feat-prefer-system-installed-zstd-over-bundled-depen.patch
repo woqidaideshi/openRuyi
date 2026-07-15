@@ -1,7 +1,21 @@
-diff --git a/build/cmake/openzl-deps.cmake b/build/cmake/openzl-deps.cmake
-index 59b691a..6b3a489 100644
---- a/build/cmake/openzl-deps.cmake
-+++ b/build/cmake/openzl-deps.cmake
+From eb7a452d0e7025980492a36e25be7845ce57036c Mon Sep 17 00:00:00 2001
+From: Yafen Fang <yafen@iscas.ac.cn>
+Date: Wed, 15 Jul 2026 12:06:21 +0800
+Subject: [PATCH] feat: prefer system-installed zstd over bundled dependency
+
+Check for a system-installed zstd via pkg-config or CMake
+find_package before falling back to the git submodule or
+FetchContent download. This avoids redundant bundled builds
+in environments where zstd is already available as a system
+package.
+---
+ build-scripts/cmake/openzl-deps.cmake | 160 ++++++++++++++++----------
+ 1 file changed, 100 insertions(+), 60 deletions(-)
+
+diff --git a/build-scripts/cmake/openzl-deps.cmake b/build-scripts/cmake/openzl-deps.cmake
+index 62c1229..57a2d94 100644
+--- a/build-scripts/cmake/openzl-deps.cmake
++++ b/build-scripts/cmake/openzl-deps.cmake
 @@ -1,5 +1,7 @@
  # Copyright (c) Meta Platforms, Inc. and affiliates.
  
@@ -24,7 +38,7 @@ index 59b691a..6b3a489 100644
  
  set(ZSTD_VERSION "1.5.7")
  set(ZSTD_DIRNAME "zstd-${ZSTD_VERSION}")
-@@ -39,61 +42,98 @@ endfunction()
+@@ -39,74 +42,111 @@ endfunction()
  
  message(STATUS "Attempting zstd dependency resolution...")
  
@@ -57,6 +71,12 @@ index 59b691a..6b3a489 100644
 -# Tier 2: FetchContent + URL with Hash Verification
 -if(NOT ZSTD_AVAILABLE)
 -    message(STATUS "Tier 1 failed. Tier 2: Trying FetchContent with verified tarball...")
+-
+-    include(FetchContent)
+-
+-    # Clean up any partial downloads first
+-    file(REMOVE_RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/deps/zstd")
+-    file(REMOVE_RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/deps/${ZSTD_DIRNAME}")
 +# If pkg-config didn't work, try find_package
 +if(NOT ZSTD_USE_SYSTEM)
 +    find_package(zstd ${ZSTD_VERSION} QUIET CONFIG)
@@ -66,13 +86,16 @@ index 59b691a..6b3a489 100644
 +    endif()
 +endif()
  
--    include(FetchContent)
+-    # DOWNLOAD_EXTRACT_TIMESTAMP was added in CMake 3.24
+-    if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24")
+-        set(ZSTD_FETCH_TIMESTAMP_OPT DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
 +if(NOT ZSTD_USE_SYSTEM)
 +    # Check if zstd is already available in deps
 +    check_zstd_available(ZSTD_AVAILABLE)
 +    if(ZSTD_AVAILABLE)
 +        message(STATUS "zstd dependency already present in deps/")
-+    else()
+     else()
+-        set(ZSTD_FETCH_TIMESTAMP_OPT)
 +        # Tier 1: Git Submodule (existing approach, matches Makefile)
 +        message(STATUS "Tier 1: Trying git submodule...")
 +        execute_process(
@@ -83,47 +106,52 @@ index 59b691a..6b3a489 100644
 +        )
 +
 +        check_zstd_available(ZSTD_AVAILABLE)
-+    endif()
- 
--    # Clean up any partial downloads first
--    file(REMOVE_RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/deps/zstd")
--    file(REMOVE_RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/deps/${ZSTD_DIRNAME}")
-+    # Tier 2: FetchContent + URL with Hash Verification
-+    if(NOT ZSTD_AVAILABLE)
-+        message(STATUS "Tier 1 failed. Tier 2: Trying FetchContent with verified tarball...")
+     endif()
  
 -    message(STATUS "Using hash verification for tarball download")
 -    FetchContent_Declare(zstd_tarball
 -        URL https://github.com/facebook/zstd/releases/download/v${ZSTD_VERSION}/${ZSTD_DIRNAME}.tar.gz
 -        URL_HASH SHA256=${ZSTD_TARBALL_SHA256}
--        DOWNLOAD_EXTRACT_TIMESTAMP ON
+-        ${ZSTD_FETCH_TIMESTAMP_OPT}
 -        SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/zstd"
 -    )
-+        include(FetchContent)
- 
+-
 -    FetchContent_MakeAvailable(zstd_tarball)
 -    check_zstd_available(ZSTD_AVAILABLE)
 -endif()
++    # Tier 2: FetchContent + URL with Hash Verification
++    if(NOT ZSTD_AVAILABLE)
++        message(STATUS "Tier 1 failed. Tier 2: Trying FetchContent with verified tarball...")
++
++        include(FetchContent)
++
 +        # Clean up any partial downloads first
 +        file(REMOVE_RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/deps/zstd")
 +        file(REMOVE_RECURSE "${CMAKE_CURRENT_SOURCE_DIR}/deps/${ZSTD_DIRNAME}")
- 
--# Final check
--if(NOT ZSTD_AVAILABLE)
--    message(FATAL_ERROR "Failed to obtain zstd dependency through all available methods (git submodule, FetchContent+tarball)")
--endif()
++
++        # DOWNLOAD_EXTRACT_TIMESTAMP was added in CMake 3.24
++        if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24")
++            set(ZSTD_FETCH_TIMESTAMP_OPT DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
++        else()
++            set(ZSTD_FETCH_TIMESTAMP_OPT)
++        endif()
++
 +        message(STATUS "Using hash verification for tarball download")
 +        FetchContent_Declare(zstd_tarball
 +            URL https://github.com/facebook/zstd/releases/download/v${ZSTD_VERSION}/${ZSTD_DIRNAME}.tar.gz
 +            URL_HASH SHA256=${ZSTD_TARBALL_SHA256}
-+            DOWNLOAD_EXTRACT_TIMESTAMP ON
++            ${ZSTD_FETCH_TIMESTAMP_OPT}
 +            SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/zstd"
 +        )
 +
 +        FetchContent_MakeAvailable(zstd_tarball)
 +        check_zstd_available(ZSTD_AVAILABLE)
 +    endif()
-+
+ 
+-# Final check
+-if(NOT ZSTD_AVAILABLE)
+-    message(FATAL_ERROR "Failed to obtain zstd dependency through all available methods (git submodule, FetchContent+tarball)")
+-endif()
 +    # Final check
 +    if(NOT ZSTD_AVAILABLE)
 +        message(FATAL_ERROR "Failed to obtain zstd dependency through all available methods (system, git submodule, FetchContent+tarball)")
@@ -133,18 +161,22 @@ index 59b691a..6b3a489 100644
 +    message(STATUS "zstd dependency resolved successfully from bundled source")
  
 -# Set zstd build options before making it available
--set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "")
--set(ZSTD_BUILD_CONTRIB OFF CACHE BOOL "")
--set(ZSTD_BUILD_TESTS OFF CACHE BOOL "")
+-# Disable zstd shared library on MSVC-frontend compilers (MSVC and ClangCL).
+-# ClangCL: rc.exe cannot find Clang's internal headers (e.g. __stddef_ptrdiff_t.h).
+-# Plain MSVC: static CRT (/MT) is incompatible with a dynamically-linked zstd DLL.
+-if(CMAKE_C_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+-    set(ZSTD_BUILD_SHARED OFF CACHE BOOL "")
 +    # Set zstd build options before making it available
++    # Disable zstd shared library on MSVC-frontend compilers (MSVC and ClangCL).
++    # ClangCL: rc.exe cannot find Clang's internal headers (e.g. __stddef_ptrdiff_t.h).
++    # Plain MSVC: static CRT (/MT) is incompatible with a dynamically-linked zstd DLL.
++    if(CMAKE_C_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
++        set(ZSTD_BUILD_SHARED OFF CACHE BOOL "")
++    endif()
 +    set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "")
 +    set(ZSTD_BUILD_CONTRIB OFF CACHE BOOL "")
 +    set(ZSTD_BUILD_TESTS OFF CACHE BOOL "")
- 
--# Add zstd subdirectory directly instead of using FetchContent
--add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/deps/zstd/build/cmake" zstd_build)
--# Note: find_package not needed when using add_subdirectory - targets are directly available
--list(APPEND OPENZL_LINK_LIBRARIES libzstd)
++
 +    # Add zstd subdirectory directly instead of using FetchContent
 +    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/deps/zstd/build/cmake" zstd_build)
 +    # Note: find_package not needed when using add_subdirectory - targets are directly available
@@ -163,7 +195,18 @@ index 59b691a..6b3a489 100644
 +        # Fallback to just linking zstd
 +        list(APPEND OPENZL_LINK_LIBRARIES zstd)
 +    endif()
-+endif()
+ endif()
+-set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "")
+-set(ZSTD_BUILD_CONTRIB OFF CACHE BOOL "")
+-set(ZSTD_BUILD_TESTS OFF CACHE BOOL "")
+-
+-# Add zstd subdirectory directly instead of using FetchContent
+-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/deps/zstd/build/cmake" zstd_build)
+-# Note: find_package not needed when using add_subdirectory - targets are directly available
+-list(APPEND OPENZL_LINK_LIBRARIES libzstd)
  
- find_library(MATH_LIBRARY m)
- if(MATH_LIBRARY)
+ # Same two-tier lz4 dependency resolution with automated hash verification
+ set(LZ4_VERSION "1.10.0")
+-- 
+2.34.1
+

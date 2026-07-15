@@ -1,5 +1,26 @@
+From 6fdabf842c07b4691de4afd4e4bd2805ae20dc2d Mon Sep 17 00:00:00 2001
+From: Yafen Fang <yafen@iscas.ac.cn>
+Date: Wed, 15 Jul 2026 11:37:03 +0800
+Subject: [PATCH] fix: install missing libs
+
+---
+ cli/CMakeLists.txt                              | 7 +++++++
+ cli/args/CMakeLists.txt                         | 8 ++++++++
+ cli/commands/CMakeLists.txt                     | 8 ++++++++
+ cli/utils/CMakeLists.txt                        | 8 ++++++++
+ custom_parsers/CMakeLists.txt                   | 9 +++++++++
+ custom_parsers/csv/CMakeLists.txt               | 8 ++++++++
+ custom_parsers/parquet/CMakeLists.txt           | 8 ++++++++
+ custom_parsers/sddl/CMakeLists.txt              | 8 ++++++++
+ custom_parsers/shared_components/CMakeLists.txt | 8 ++++++++
+ tools/arg/CMakeLists.txt                        | 8 ++++++++
+ tools/logger/CMakeLists.txt                     | 8 ++++++++
+ tools/sddl/CMakeLists.txt                       | 8 ++++++++
+ tools/training/CMakeLists.txt                   | 9 +++++++++
+ 13 files changed, 105 insertions(+)
+
 diff --git a/cli/CMakeLists.txt b/cli/CMakeLists.txt
-index 94831a2..7331d5f 100644
+index c836930..436adeb 100644
 --- a/cli/CMakeLists.txt
 +++ b/cli/CMakeLists.txt
 @@ -40,3 +40,10 @@ add_dependencies(zli
@@ -14,13 +35,13 @@ index 94831a2..7331d5f 100644
 +        COMPONENT runtime)
 +endif()
 diff --git a/cli/args/CMakeLists.txt b/cli/args/CMakeLists.txt
-index 878a68c..e38be36 100644
+index 3a5c854..4e5f67a 100644
 --- a/cli/args/CMakeLists.txt
 +++ b/cli/args/CMakeLists.txt
-@@ -28,3 +28,11 @@ add_dependencies(args
-     custom_parsers
+@@ -30,3 +30,11 @@ add_dependencies(args
      tools_io
-     arg)
+     arg
+     utils)
 +
 +# Install args library
 +if (OPENZL_INSTALL)
@@ -46,10 +67,10 @@ index 78502bf..bbcc35e 100644
 +        COMPONENT runtime)
 +endif()
 diff --git a/cli/utils/CMakeLists.txt b/cli/utils/CMakeLists.txt
-index 928755b..7129c3f 100644
+index 6ba0a6d..2b41a5e 100644
 --- a/cli/utils/CMakeLists.txt
 +++ b/cli/utils/CMakeLists.txt
-@@ -44,3 +44,11 @@ add_dependencies(utils
+@@ -48,3 +48,11 @@ add_dependencies(utils
  )
  
  apply_openzl_compile_options_to_target(utils)
@@ -62,10 +83,10 @@ index 928755b..7129c3f 100644
 +        COMPONENT runtime)
 +endif()
 diff --git a/custom_parsers/CMakeLists.txt b/custom_parsers/CMakeLists.txt
-index 3ef598c..3b7f32e 100644
+index aa35fdc..bd05eb7 100644
 --- a/custom_parsers/CMakeLists.txt
 +++ b/custom_parsers/CMakeLists.txt
-@@ -53,3 +53,12 @@ apply_openzl_compile_options_to_target(custom_parsers
+@@ -54,3 +54,12 @@ apply_openzl_compile_options_to_target(custom_parsers
      parquet_graph
      shared_components
  )
@@ -79,12 +100,12 @@ index 3ef598c..3b7f32e 100644
 +        COMPONENT runtime)
 +endif()
 diff --git a/custom_parsers/csv/CMakeLists.txt b/custom_parsers/csv/CMakeLists.txt
-index 951488b..aa11964 100644
+index 31f91d5..574b531 100644
 --- a/custom_parsers/csv/CMakeLists.txt
 +++ b/custom_parsers/csv/CMakeLists.txt
-@@ -21,3 +21,11 @@ target_link_libraries(csv_parser
+@@ -22,3 +22,11 @@ target_link_libraries(csv_parser
  
- add_dependencies(csv_parser openzl)
+ add_dependencies(csv_parser openzl shared_components)
  apply_openzl_compile_options_to_target(csv_parser)
 +
 +# Install csv_parser library
@@ -142,3 +163,75 @@ index 028512c..0a95695 100644
 +        ARCHIVE DESTINATION ${OPENZL_INSTALL_LIBDIR}
 +        COMPONENT runtime)
 +endif()
+diff --git a/tools/arg/CMakeLists.txt b/tools/arg/CMakeLists.txt
+index 76b54bf..691d883 100644
+--- a/tools/arg/CMakeLists.txt
++++ b/tools/arg/CMakeLists.txt
+@@ -29,4 +29,12 @@ if (OPENZL_BUILD_ARG_TOOLS)
+         apply_openzl_compile_options_to_target(test_arg_parser)
+         gtest_discover_tests(test_arg_parser)
+     endif()
++
++    # Install arg library
++    if (OPENZL_INSTALL)
++        install(TARGETS arg
++            LIBRARY DESTINATION ${OPENZL_INSTALL_LIBDIR}
++            ARCHIVE DESTINATION ${OPENZL_INSTALL_LIBDIR}
++            COMPONENT runtime)
++    endif()
+ endif()
+diff --git a/tools/logger/CMakeLists.txt b/tools/logger/CMakeLists.txt
+index 598c522..02adf37 100644
+--- a/tools/logger/CMakeLists.txt
++++ b/tools/logger/CMakeLists.txt
+@@ -9,4 +9,12 @@ set_property(TARGET logger PROPERTY POSITION_INDEPENDENT_CODE ON)
+ 
+ target_include_directories(logger PUBLIC ${PROJECT_SOURCE_DIR})
+ apply_openzl_compile_options_to_target(logger)
++
++# Install logger library
++if (OPENZL_INSTALL)
++    install(TARGETS logger
++        LIBRARY DESTINATION ${OPENZL_INSTALL_LIBDIR}
++        ARCHIVE DESTINATION ${OPENZL_INSTALL_LIBDIR}
++        COMPONENT runtime)
++endif()
+ endif()
+diff --git a/tools/sddl/CMakeLists.txt b/tools/sddl/CMakeLists.txt
+index ae0c9b5..df98102 100644
+--- a/tools/sddl/CMakeLists.txt
++++ b/tools/sddl/CMakeLists.txt
+@@ -62,4 +62,12 @@ if (OPENZL_BUILD_SDDL_TOOLS)
+         apply_openzl_compile_options_to_target(test_sddl_compiler)
+         gtest_discover_tests(test_sddl_compiler)
+     endif()
++
++    # Install sddl_compiler_lib library
++    if (OPENZL_INSTALL)
++        install(TARGETS sddl_compiler_lib
++            LIBRARY DESTINATION ${OPENZL_INSTALL_LIBDIR}
++            ARCHIVE DESTINATION ${OPENZL_INSTALL_LIBDIR}
++            COMPONENT runtime)
++    endif()
+ endif()
+diff --git a/tools/training/CMakeLists.txt b/tools/training/CMakeLists.txt
+index c93b090..e9cbd35 100644
+--- a/tools/training/CMakeLists.txt
++++ b/tools/training/CMakeLists.txt
+@@ -65,4 +65,13 @@ if (OPENZL_BUILD_TRAINING_TOOLS)
+     apply_openzl_compile_options_to_target(test_training)
+     gtest_discover_tests(test_training)
+   endif()
++
++  # Install tools_training library
++  if (OPENZL_INSTALL)
++    install(TARGETS tools_training
++        LIBRARY DESTINATION ${OPENZL_INSTALL_LIBDIR}
++        ARCHIVE DESTINATION ${OPENZL_INSTALL_LIBDIR}
++        COMPONENT runtime)
++  endif()
++
+ endif()
+-- 
+2.34.1
+
