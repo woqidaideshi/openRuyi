@@ -18,9 +18,6 @@ BuildSystem:    cmake
 Patch2000:      2000-add-install-rules-for-CLI-tools-and-parser-targets.patch
 Patch2001:      2001-feat-prefer-system-installed-zstd-over-bundled-depen.patch
 
-BuildOption(conf):  -DCMAKE_EXE_LINKER_FLAGS="%{build_ldflags} -Wl,--as-needed"
-BuildOption(conf):  -DCMAKE_MODULE_LINKER_FLAGS="%{build_ldflags} -Wl,--as-needed"
-BuildOption(conf):  -DCMAKE_SHARED_LINKER_FLAGS="%{build_ldflags} -Wl,--as-needed"
 BuildOption(conf):  -DOPENZL_BUILD_TESTS:BOOL=OFF
 BuildOption(conf):  -DOPENZL_BUILD_BENCHMARKS:BOOL=OFF
 BuildOption(conf):  -DBUILD_SHARED_LIBS:BOOL=ON
