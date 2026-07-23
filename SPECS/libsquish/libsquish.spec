@@ -39,12 +39,21 @@ developing applications that use %{name}.
 %autosetup -p1
 tar -xf %{SOURCE1} -C .
 
+# Fix OBCMake hardcoded cmake install destination
+sed -i 's|INSTALL_DESTINATION "cmake"|INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/libsquish"|' \
+  OBCmake-%{OBCMake_version}/cmake/module/OB/Project.cmake
+sed -i 's|^        DESTINATION "cmake"$|        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/libsquish"|' \
+  OBCmake-%{OBCMake_version}/cmake/module/OB/Project.cmake
+sed -i 's|DESTINATION "cmake/${_ALIAS}"|DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/libsquish/${_ALIAS}"|' \
+  OBCmake-%{OBCMake_version}/cmake/module/OB/Library.cmake
+sed -i 's|DESTINATION "cmake/${_ALIAS}"|DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/libsquish/${_ALIAS}"|' \
+  OBCmake-%{OBCMake_version}/cmake/module/OB/Executable.cmake
+sed -i 's|DESTINATION "cmake/${alias}"|DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/libsquish/${alias}"|' \
+  OBCmake-%{OBCMake_version}/cmake/private/common.cmake
+
 %install -a
 rm -f %{buildroot}%{_prefix}/LICENSE
 rm -f %{buildroot}%{_prefix}/README.md
-mkdir -p %{buildroot}%{_libdir}/cmake/libsquish
-mv %{buildroot}%{_prefix}/cmake/* %{buildroot}%{_libdir}/cmake/libsquish/
-rmdir %{buildroot}%{_prefix}/cmake
 
 %files
 %doc README.md
