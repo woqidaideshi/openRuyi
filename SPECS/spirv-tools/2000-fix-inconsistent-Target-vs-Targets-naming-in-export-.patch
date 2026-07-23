@@ -1,0 +1,73 @@
+From 4ce31c96fa975738bb6454b180cea2c59b58ac99 Mon Sep 17 00:00:00 2001
+From: Yafen Fang <yafen@iscas.ac.cn>
+Date: Thu, 23 Jul 2026 16:46:44 +0800
+Subject: [PATCH] fix inconsistent Target vs Targets naming in export FILE
+
+Three subdirectories use singular `Target` in the `FILE` parameter of
+`install(EXPORT ...)`, while all others and the generated Config files
+use plural `Targets`. This causes `find_package(SPIRV-Tools CONFIG)`
+and dependents (SPIRV-Tools-opt, -diff, -link, -lint) to fail with
+missing imported target errors.
+
+Changed `${SPIRV_TOOLS}Target.cmake` / `SPIRV-Tools-*Target.cmake`
+to plural `Targets` to match the rest of the project.
+---
+ source/CMakeLists.txt        | 4 ++--
+ source/fuzz/CMakeLists.txt   | 4 ++--
+ source/reduce/CMakeLists.txt | 4 ++--
+ 3 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/source/CMakeLists.txt b/source/CMakeLists.txt
+index dbe60902..9378afd0 100644
+--- a/source/CMakeLists.txt
++++ b/source/CMakeLists.txt
+@@ -397,10 +397,10 @@ if(ENABLE_SPIRV_TOOLS_INSTALL)
+     list(APPEND SPIRV_TOOLS_TARGETS mimalloc-static)
+   endif()
+   install(TARGETS ${SPIRV_TOOLS_TARGETS} EXPORT ${SPIRV_TOOLS}Targets)
+-  export(EXPORT ${SPIRV_TOOLS}Targets FILE ${SPIRV_TOOLS}Target.cmake)
++  export(EXPORT ${SPIRV_TOOLS}Targets FILE ${SPIRV_TOOLS}Targets.cmake)
+ 
+   spvtools_config_package_dir(${SPIRV_TOOLS} PACKAGE_DIR)
+-  install(EXPORT ${SPIRV_TOOLS}Targets FILE ${SPIRV_TOOLS}Target.cmake DESTINATION ${PACKAGE_DIR})
++  install(EXPORT ${SPIRV_TOOLS}Targets FILE ${SPIRV_TOOLS}Targets.cmake DESTINATION ${PACKAGE_DIR})
+ 
+   # Special config file for root library compared to other libs.
+   file(WRITE ${CMAKE_BINARY_DIR}/${SPIRV_TOOLS}Config.cmake
+diff --git a/source/fuzz/CMakeLists.txt b/source/fuzz/CMakeLists.txt
+index 95391f53..848192f7 100644
+--- a/source/fuzz/CMakeLists.txt
++++ b/source/fuzz/CMakeLists.txt
+@@ -480,10 +480,10 @@ if(SPIRV_BUILD_FUZZER)
+       endif()
+ 
+       install(TARGETS ${SPIRV-Tools-fuzz-InstallTargets} EXPORT SPIRV-Tools-fuzzTargets)
+-      export(EXPORT SPIRV-Tools-fuzzTargets FILE SPIRV-Tools-fuzzTarget.cmake)
++      export(EXPORT SPIRV-Tools-fuzzTargets FILE SPIRV-Tools-fuzzTargets.cmake)
+ 
+       spvtools_config_package_dir(SPIRV-Tools-fuzz PACKAGE_DIR)
+-      install(EXPORT SPIRV-Tools-fuzzTargets FILE SPIRV-Tools-fuzzTarget.cmake
++      install(EXPORT SPIRV-Tools-fuzzTargets FILE SPIRV-Tools-fuzzTargets.cmake
+             DESTINATION ${PACKAGE_DIR})
+ 
+       spvtools_generate_config_file(SPIRV-Tools-fuzz)
+diff --git a/source/reduce/CMakeLists.txt b/source/reduce/CMakeLists.txt
+index b631e9d0..06bd09ab 100644
+--- a/source/reduce/CMakeLists.txt
++++ b/source/reduce/CMakeLists.txt
+@@ -97,10 +97,10 @@ spvtools_check_symbol_exports(SPIRV-Tools-reduce)
+ 
+ if(ENABLE_SPIRV_TOOLS_INSTALL)
+   install(TARGETS SPIRV-Tools-reduce EXPORT SPIRV-Tools-reduceTargets)
+-  export(EXPORT SPIRV-Tools-reduceTargets FILE SPIRV-Tools-reduceTarget.cmake)
++  export(EXPORT SPIRV-Tools-reduceTargets FILE SPIRV-Tools-reduceTargets.cmake)
+ 
+   spvtools_config_package_dir(SPIRV-Tools-reduce PACKAGE_DIR)
+-  install(EXPORT SPIRV-Tools-reduceTargets FILE SPIRV-Tools-reduceTarget.cmake
++  install(EXPORT SPIRV-Tools-reduceTargets FILE SPIRV-Tools-reduceTargets.cmake
+   	DESTINATION ${PACKAGE_DIR})
+ 
+   spvtools_generate_config_file(SPIRV-Tools-reduce)
+-- 
+2.34.1
+

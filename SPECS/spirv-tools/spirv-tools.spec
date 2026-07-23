@@ -15,6 +15,8 @@ URL:            https://github.com/KhronosGroup/SPIRV-Tools
 Source0:        https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/vulkan-sdk-%{version}.tar.gz
 BuildSystem:    cmake
 
+Patch2000:      2000-fix-inconsistent-Target-vs-Targets-naming-in-export-.patch
+
 BuildOption(conf):  -DBUILD_SHARED_LIBS=ON
 BuildOption(conf):  -DSPIRV-Headers_SOURCE_DIR=%{_prefix}
 BuildOption(conf):  -DPYTHON_EXECUTABLE=%{__python3}
