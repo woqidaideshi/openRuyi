@@ -53,7 +53,7 @@
 %global llvm_triple %{_target_platform}
 
 # enabled projects and runtimes
-%global projects clang;clang-tools-extra;lld
+%global projects clang;clang-cpp;clang-tools-extra;lld
 %global runtimes compiler-rt;openmp
 %global projects %{projects};lldb
 %global projects %{projects};mlir
