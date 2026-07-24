@@ -1,27 +1,29 @@
-From 4ce31c96fa975738bb6454b180cea2c59b58ac99 Mon Sep 17 00:00:00 2001
+From e4300ba5e8631a9151404b76e6a2ec9b42d82e6b Mon Sep 17 00:00:00 2001
 From: Yafen Fang <yafen@iscas.ac.cn>
 Date: Thu, 23 Jul 2026 16:46:44 +0800
-Subject: [PATCH] fix inconsistent Target vs Targets naming in export FILE
+Subject: [PATCH] fix inconsistent Target vs Targets naming in export FILE and
+ Config.cmake
 
-Three subdirectories use singular `Target` in the `FILE` parameter of
-`install(EXPORT ...)`, while all others and the generated Config files
-use plural `Targets`. This causes `find_package(SPIRV-Tools CONFIG)`
-and dependents (SPIRV-Tools-opt, -diff, -link, -lint) to fail with
-missing imported target errors.
+Three files use singular `Target` in `install(EXPORT ...)` FILE names
+and the generated `SPIRV-ToolsConfig.cmake`, while all other files and
+sub-projects consistently use plural `Targets`. This causes
+`find_package()` for SPIRV-Tools and its dependents (SPIRV-Tools-opt,
+-diff, -link, -lint) to fail with missing imported target errors.
 
-Changed `${SPIRV_TOOLS}Target.cmake` / `SPIRV-Tools-*Target.cmake`
-to plural `Targets` to match the rest of the project.
+Fixed:
+- export/install FILE changed from Target.cmake to Targets.cmake
+- Config.cmake include changed from Target.cmake to Targets.cmake
 ---
- source/CMakeLists.txt        | 4 ++--
+ source/CMakeLists.txt        | 6 +++---
  source/fuzz/CMakeLists.txt   | 4 ++--
  source/reduce/CMakeLists.txt | 4 ++--
- 3 files changed, 6 insertions(+), 6 deletions(-)
+ 3 files changed, 7 insertions(+), 7 deletions(-)
 
 diff --git a/source/CMakeLists.txt b/source/CMakeLists.txt
-index dbe60902..9378afd0 100644
+index 8e918de0..ad6c88c8 100644
 --- a/source/CMakeLists.txt
 +++ b/source/CMakeLists.txt
-@@ -397,10 +397,10 @@ if(ENABLE_SPIRV_TOOLS_INSTALL)
+@@ -391,14 +391,14 @@ if(ENABLE_SPIRV_TOOLS_INSTALL)
      list(APPEND SPIRV_TOOLS_TARGETS mimalloc-static)
    endif()
    install(TARGETS ${SPIRV_TOOLS_TARGETS} EXPORT ${SPIRV_TOOLS}Targets)
@@ -34,8 +36,13 @@ index dbe60902..9378afd0 100644
  
    # Special config file for root library compared to other libs.
    file(WRITE ${CMAKE_BINARY_DIR}/${SPIRV_TOOLS}Config.cmake
+-    "include(\${CMAKE_CURRENT_LIST_DIR}/${SPIRV_TOOLS}Target.cmake)\n"
++    "include(\${CMAKE_CURRENT_LIST_DIR}/${SPIRV_TOOLS}Targets.cmake)\n"
+     "if(TARGET ${SPIRV_TOOLS})\n"
+     "    set(${SPIRV_TOOLS}_LIBRARIES ${SPIRV_TOOLS})\n"
+     "    get_target_property(${SPIRV_TOOLS}_INCLUDE_DIRS ${SPIRV_TOOLS} INTERFACE_INCLUDE_DIRECTORIES)\n"
 diff --git a/source/fuzz/CMakeLists.txt b/source/fuzz/CMakeLists.txt
-index 95391f53..848192f7 100644
+index a3e03957..71274dd2 100644
 --- a/source/fuzz/CMakeLists.txt
 +++ b/source/fuzz/CMakeLists.txt
 @@ -480,10 +480,10 @@ if(SPIRV_BUILD_FUZZER)
