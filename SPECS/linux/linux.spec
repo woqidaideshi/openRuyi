@@ -47,18 +47,16 @@
 %global patchset_release 3
 %global config_version 1
 # Initial mainline tarballs omit the .0 that the kernel Makefile reports.
-%global upstream_version 7.2
+%global upstream_version 6.18
 
 Name:           linux
-Version:        7.2.0
+Version:        6.18.51
 Release:        %{patchset_release}.%{config_version}_%autorelease
 Summary:        The Linux Kernel
 License:        GPL-2.0-only
 URL:            https://www.kernel.org/
-#!RemoteAsset:  sha256:f9fef3d14c0df53819026f4be74459835c2a0b0dcbf5b5bbd9ea19f0829402b3
-Source0:        https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-%{upstream_version}.tar.xz
-#!RemoteAsset:  sha256:fde1cb23bfaa54c5aa50811eb7462119f1403834a343d8a10e62fac32db54e60
-Source1:        https://github.com/openRuyi-Project/kernel-team-tools/releases/download/v%{upstream_version}-%{patchset_release}.%{config_version}/%{name}-v%{upstream_version}-%{patchset_release}.tar.gz
+#!RemoteAsset:  sha256:55ddf0df8325d9dad96fcff7bd93977d22e3f50af06527572af59b77c7632b78
+Source0:        https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-%{version}.tar.xz
 
 BuildRequires:  gcc
 BuildRequires:  bison
@@ -189,22 +187,13 @@ for booting.
 %endif
 
 %prep
-%autosetup -n %{name}-%{upstream_version} -N
-
-patchset_dir=.openruyi-patchset
-mkdir "${patchset_dir}"
-tar -xf "%{SOURCE1}" -C "${patchset_dir}"
-while IFS= read -r patch_name; do
-    echo "Applying patch: ${patch_name}"
-    patch -p1 < "${patchset_dir}/${patch_name}" || exit 1
-done < "${patchset_dir}/series"
-cp -v "${patchset_dir}/config.%{_arch}%{arch_suffix}" .config
-rm -rf "${patchset_dir}"
+%autosetup -n %{name}-%{version} -N
 
 echo "-%{kernel_local_version}" > localversion
 
 %conf
 %make_build %{kernel_make_flags} olddefconfig
+sed -i 's/^#* *CONFIG_DEBUG_VM is not set.*/CONFIG_DEBUG_VM=y/' .config
 
 %build
 %if %{with tools}
