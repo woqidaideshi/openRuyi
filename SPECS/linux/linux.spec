@@ -194,6 +194,8 @@ echo "-%{kernel_local_version}" > localversion
 %conf
 %make_build %{kernel_make_flags} olddefconfig
 sed -i 's/^#* *CONFIG_DEBUG_VM is not set.*/CONFIG_DEBUG_VM=y/' .config
+sed -i 's/^# CONFIG_SERIAL_AMBA_PL010 is not set/CONFIG_SERIAL_AMBA_PL010=y/' .config
+sed -i 's/^# CONFIG_SERIAL_AMBA_PL011 is not set/CONFIG_SERIAL_AMBA_PL011=y/' .config
 
 %build
 %if %{with tools}
